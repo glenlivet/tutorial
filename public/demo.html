@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>searchbox demo</title>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.easyui.min.js"></script>
+    <link href="themes/color.css" />
+    <link href="themes/icon.css" />
+<style>
+    #page-wrapper {
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    table {
+        width: 100%;
+    }
+    @media screen {
+        /*.print-only {
+            display: none;
+        }*/
+    }
+    @media print {
+        #page-wrapper {
+            display: none;
+        }
+
+        .print-only {
+            display: block;
+        }
+
+    }
+    
+</style>
+
+</head>
+<body>
+
+    <div id="page-wrapper">
+        <button onclick="NS_PrintUtil.print();">aa</button>
+        <div>
+            <input type="hidden" value="aaa" />
+            <input type="hidden" value="bbb" />
+        </div>
+        <form>
+            <table>
+                <tr>
+                    <td>信息1: </td>
+                    <td><input type="text" value="aaa" /></td>
+                    <td>信息2: </td>
+                    <td class="radio"><input type="radio" name="ri" value="1" checked/>ccc<input name="ri" type="radio" value="2" />ddd</td>
+                </tr>
+                <tr>
+                    <td>xxx</td>
+                    <td>
+                        <select>
+                            <option value="3" selected>bbb</option>
+                            <option value="4">aaa</option>
+                        </select>
+                    </td>
+                    <td>fff</td>
+                    <td>
+                        <textarea>cccccddd</textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>subtable</td>
+                    <td colspan="3">
+                        <table id="subtable" class="easyui-datagrid" data-options="url:'data',method:'get',fitColumns:true">
+                            <thead>
+                                <tr>
+                                    <th data-options="field:'code'">Code</th>
+                                    <th data-options="field:'name'">Name</th>
+                                    <th data-options="field:'price'">Price</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            
+        </form>
+
+    </div>
+    
+    <script>
+        
+
+        var NS_PrintUtil = {
+            getNativeContent: function(){
+
+            },
+            getFrameContent: function(){
+                var bodyContent = document.body.innerHTML;
+                return bodyContent;
+            },
+            insertPrintDiv: function(){
+                var bc = this.getFrameContent();
+                console.log(bc);
+                bc = this.cleanHtml(bc);
+                var printWrapper = $('<div />').attr('id', 'print-wrapper')
+                    .addClass('print-only').appendTo('body');
+                printWrapper.html(bc);
+
+            },
+            removeJs: function(){
+                var obj = $('body').clone().remove('script');
+
+                var printWrapper = $('<div />').attr('id', 'print-wrapper')
+                    .addClass('print-only').appendTo('body');
+                printWrapper.append(obj);
+            },
+            convertInputs: function(){
+                //text input to span
+                $('#print-wrapper :text').each(function(i, ele){
+                    var val = ele.value;
+                    var span = '<span>' + val + '</span>';
+                    $(this).parent().html(span);
+                });
+                // radio input
+                $('#print-wrapper :radio').each(function(i, ele){
+                    
+                });
+                // select 
+                $('#print-wrapper select').each(function(i, ele){
+                    var val = '';
+                    if(ele.selectedIndex == -1){
+                        //TODO
+                    } else {
+                        val = ele.options[ele.selectedIndex].text;
+                    }
+                    $(this).parent().html(val);
+                });
+                // textarea
+                $('#print-wrapper textarea').each(function(i, ele){
+                    var val = $(ele).text();
+                    $(this).parent().html(val);
+                });
+            },
+            convertDataGrid: function(){
+                $('#print-wrapper div.panel.datagrid').each(function(i, ele){
+                    var table = $('<table/>');
+                    var head = $(ele).find('.datagrid-header-row').clone();
+                    var rows = $(ele).find('.datagrid-row').clone();
+                    table.append(head);
+                    rows.each(function(i, ele){
+                        table.append(rows[i]);
+                    });
+                    $(ele).html('').append(table);
+                });
+            },
+            cleanHtml: function(html){
+                //remove script, styles, hidden inputs,
+                var scriptPatt = /<script([\s\S]*)?<\/script>/ig;
+                var stylePatt = /<style([\s\S]*)?<\/style>/ig;
+                //var hiddenPatt = /<input([\s\S]*)?type=['|"]hidden['|"]([\s\S]*)?>/ig;
+                var cleaner = html.replace(scriptPatt, "").replace(stylePatt, "");
+                    //.replace(hiddenPatt, "");
+                return cleaner;
+            },
+            print: function(){
+                this.insertPrintDiv();
+                this.convertInputs();
+                this.convertDataGrid();
+            }
+
+        };
+    </script>
+</body>
+</html>
