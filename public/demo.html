@@ -73,12 +73,17 @@
                                     <th data-options="field:'code'">Code</th>
                                     <th data-options="field:'name'">Name</th>
                                     <th data-options="field:'price'">Price</th>
+                                    <th data-options="field:'cannotsee', hidden:true">Cannot See</th>
                                 </tr>
                             </thead>
                         </table>
                     </td>
                 </tr>
             </table>
+
+            <div style="display:none">
+                You cannot see this part, nor copy this part!
+            </div>
             
         </form>
 
@@ -104,14 +109,32 @@
                 printWrapper.html(bc);
 
             },
-            removeJs: function(){
-                var obj = $('body').clone().remove('script');
+            removeInvisible: function(){
+                //input hidden removal
+                $('#print-wrapper :hidden').remove();
+                //
+                $('#print-wrapper div').filter(function() {
+                    return $(this).css('display') == 'none';
+                }).remove();
 
-                var printWrapper = $('<div />').attr('id', 'print-wrapper')
-                    .addClass('print-only').appendTo('body');
-                printWrapper.append(obj);
+                $('#print-wrapper span').filter(function() {
+                    return $(this).css('display') == 'none';
+                }).remove();
+
+                $('#print-wrapper table').filter(function() {
+                    return $(this).css('display') == 'none';
+                }).remove();
+
+                $('#print-wrapper tr').filter(function() {
+                    return $(this).css('display') == 'none';
+                }).remove();
+
+                $('#print-wrapper td').filter(function() {
+                    return $(this).css('display') == 'none';
+                }).remove();
+
             },
-            convertInputs: function(){
+            convertInput: function(){
                 //text input to span
                 $('#print-wrapper :text').each(function(i, ele){
                     var val = ele.value;
@@ -126,7 +149,6 @@
                 $('#print-wrapper select').each(function(i, ele){
                     var val = '';
                     if(ele.selectedIndex == -1){
-                        //TODO
                     } else {
                         val = ele.options[ele.selectedIndex].text;
                     }
@@ -161,8 +183,9 @@
             },
             print: function(){
                 this.insertPrintDiv();
-                this.convertInputs();
+                this.convertInput();
                 this.convertDataGrid();
+                this.removeInvisible();
             }
 
         };
